@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'info.ryzora@gmail.com';
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidProduct(data) {
+      return data.sku is string && data.sku.size() <= 64 &&
+             data.name is string && data.name.size() <= 256 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.priceBdt is number && data.priceBdt >= 0 &&
+             (!('discountPriceBdt' in data) || data.discountPriceBdt == null || (data.discountPriceBdt is number && data.discountPriceBdt >= 0)) &&
+             data.stockQuantity is int && data.stockQuantity >= 0 &&
+             data.isActive is bool;
+    }
+
+    function isValidOrder(data) {
+      return data.orderNumber is string && data.orderNumber.size() <= 50 &&
+             data.customerName is string && data.customerName.size() <= 150 &&
+             data.customerPhone is string && data.customerPhone.size() <= 25 &&
+             data.deliveryAddress is string && data.deliveryAddress.size() <= 500 &&
+             data.totalBdt is number && data.totalBdt >= 0 &&
+             data.status in ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+    }
+
+    function isValidConversation(data) {
+      return data.customerPsid is string && data.customerPsid.size() <= 100 &&
+             data.customerName is string && data.customerName.size() <= 150 &&
+             data.isAiActive is bool;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && incoming().userId == request.auth.uid;
+      allow update: if (isOwner(userId) || isAdmin()) && incoming().userId == existing().userId;
+      allow delete: if isAdmin();
+    }
+
+    // Products catalog
+    match /products/{productId} {
+      allow get, list: if true; // Public catalog access
+      allow create: if isAdmin() && isValidProduct(incoming());
+      allow update: if isAdmin() && isValidProduct(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create: if (isSignedIn() || isAdmin()) && isValidOrder(incoming());
+      allow update: if isAdmin() && isValidOrder(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Conversations & AI Takeovers
+    match /conversations/{conversationId} {
+      allow get, list: if isAdmin();
+      allow create: if isAdmin() && isValidConversation(incoming());
+      allow update: if isAdmin() && isValidConversation(incoming());
+      allow delete: if isAdmin();
+    }
+  }
+}

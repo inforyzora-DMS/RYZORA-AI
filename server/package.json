@@ -1,0 +1,16 @@
+{
+  "name": "ryzora-messenger-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "RYZORA Facebook Messenger AI Customer Service and Order Management Backend",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": ["facebook-messenger", "ai-agent", "gemini", "ryzora", "bangladesh-ecommerce"],
+  "author": "RYZORA Engineering",
+  "license": "ISC"
+}

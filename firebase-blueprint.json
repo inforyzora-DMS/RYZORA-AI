@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile and role information",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Auth UID" },
+        "email": { "type": "string", "description": "Email address" },
+        "displayName": { "type": "string", "description": "Full name" },
+        "role": { "type": "string", "enum": ["admin", "staff", "customer"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "email", "role", "createdAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "RYZORA verified product catalog item with pricing in BDT",
+      "type": "object",
+      "properties": {
+        "sku": { "type": "string", "description": "Unique SKU" },
+        "name": { "type": "string", "description": "Product title" },
+        "banglaName": { "type": "string", "description": "Product title in Bengali" },
+        "category": { "type": "string", "description": "Category" },
+        "priceBdt": { "type": "number", "description": "Regular price in BDT" },
+        "discountPriceBdt": { "type": "number", "description": "Offer price in BDT" },
+        "stockQuantity": { "type": "integer", "description": "Available inventory" },
+        "isActive": { "type": "boolean", "description": "Catalog visibility" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sku", "name", "category", "priceBdt", "stockQuantity", "isActive"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order details and fulfillment status in Bangladesh",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string", "description": "Order code RYZ-YYYYMMDD-XXXX" },
+        "customerName": { "type": "string", "description": "Customer recipient name" },
+        "customerPhone": { "type": "string", "description": "11-digit Bangladeshi mobile number" },
+        "deliveryAddress": { "type": "string", "description": "Delivery street address" },
+        "deliveryZone": { "type": "string", "enum": ["Inside Dhaka", "Outside Dhaka"] },
+        "deliveryFeeBdt": { "type": "number", "description": "Shipping fee in BDT" },
+        "subtotalBdt": { "type": "number", "description": "Order subtotal in BDT" },
+        "totalBdt": { "type": "number", "description": "Total payable in BDT" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled"] },
+        "paymentMethod": { "type": "string", "description": "Payment type" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orderNumber", "customerName", "customerPhone", "deliveryAddress", "totalBdt", "status", "createdAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "Facebook Messenger customer interaction and AI state",
+      "type": "object",
+      "properties": {
+        "customerPsid": { "type": "string", "description": "Facebook Page-scoped ID" },
+        "customerName": { "type": "string", "description": "Customer name" },
+        "isAiActive": { "type": "boolean", "description": "AI auto-reply toggle" },
+        "requiresHumanTakeover": { "type": "boolean", "description": "Escalation flag" },
+        "currentIntent": { "type": "string", "description": "Detected customer intent" },
+        "lastMessage": { "type": "string", "description": "Preview of last message" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerPsid", "customerName", "isAiActive", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User authentication profile"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Catalog products for RYZORA store"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "E-commerce orders and status"
+    },
+    "/conversations/{conversationId}": {
+      "schema": { "$ref": "#/entities/Conversation" },
+      "description": "Messenger conversations and AI takeover state"
+    }
+  }
+}

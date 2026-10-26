@@ -1,0 +1,6 @@
+{
+  "name": "RYZORA AI",
+  "description": "RYZORA Facebook Messenger AI Customer Service & Order Management Platform",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
